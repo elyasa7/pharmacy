@@ -1,0 +1,39 @@
+{% extends "admin/main_admin.html" %}
+
+{%  block main_wrapper %}
+	<div class="row max-row">
+		<div class="small-12 columns text-center">
+			<h3>
+				{{ content }}
+			</h3>
+		</div>
+	</div>
+	<div class="row max-row">
+		<div class="large-offset-4 medium-offset-2 small-offset-1 large-4 medium-8 small-10 columns login-card padding-all-40">
+			<h5 class="text-center padding-all-20">
+				Login to your Account
+				<hr>
+			</h5>
+			<form action="/manager/login/submit/" method="POST">
+				{% csrf_token %}
+				<label>
+					Username
+					<input type="text" name="role_user_username" required>
+				</label>
+				<label>
+					Password
+					<input type="password" name="role_user_password" required>
+				</label>
+				<a href="#">Reset password</a>
+				<input type="submit" class="button tiny min-width-button float-right" value="Login">
+			</form>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			$('body').addClass('image-background');
+		});
+	</script>
+
+{% endblock %}

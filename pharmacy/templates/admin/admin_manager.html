@@ -1,0 +1,569 @@
+{% extends "admin/main_admin.html" %}
+
+{% block main_wrapper %}
+	{% include 'admin/blocks/admin_main_menu.html' %}
+	{% csrf_token %}
+	<div class="padding-all-20">
+		<h3 class="float-left">
+			Manage Administrators
+		</h3>
+		<div class="button-group small float-right">
+			<a class="button success text-white small-border-radius" data-open="add_new_item">
+				Add<span class="show-for-large"> admin</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Extended filter</span>
+				<span class="hide-for-large">Filter</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				Enable
+			</a>
+			<a class="button secondary small-border-radius">
+				Disable
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Delete</span>
+				<span class="hide-for-large">D</span>
+			</a>
+		</div>
+
+		<table class="hover items-table">
+			<thead>
+			<tr>
+				<td class="width-0">ID</td>
+				<td>Username</td>
+				<td>First Name</td>
+				<td>Last Name</td>
+				<td>Email</td>
+				<td>UUID</td>
+			</tr>
+			</thead>
+			<tbody class="items-table-body"></tbody>
+		</table>
+
+		<div class="bottom-page-info float-left"></div>
+		<div class="bottom-navigation float-right"></div>
+
+		<div class="reveal" id="add_new_item" data-reveal data-options="showDelay:200; hideDelay:200">
+			<h4 class="padding-height-20">Add new administrator</h4>
+			<form class="add_edit_admin">
+				{% csrf_token %}
+				<div class="row">
+					<div class="medium-6 small-12 columns">
+						<label>
+							Username
+							<input type="text" name="role_user_username" required>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							E-mail
+							<input type="text" name="role_user_email" required>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-6 small-12 columns">
+						<label>
+							First Name
+							<input type="text" name="role_user_firstname" required>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							Last Name
+							<input type="text" name="role_user_lastname" required>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-6 small-12 columns">
+						<label>
+							Password
+							<input type="password" name="role_user_password1" required>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							Repeat password
+							<input type="password" name="role_user_password2" required>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="mall-12 columns">
+						<label>
+							Address
+							<textarea name="role_user_address" rows="3"></textarea>
+						</label>
+					</div>
+				</div>
+
+				<input type="hidden" name="page_number" value="1">
+
+				<p>All fields marked with * are required</p>
+
+				<button data-close aria-label="Close modal" type="button" class="button small secondary">
+					Cancel
+				</button>
+
+				<button type="button" class="button small success text-white add_edit_item_save float-right">
+					Save Admin
+				</button>
+
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+
+		<!-- -=-=-=-=-=-=-=-=-=-=- -->
+		<!-- REVEAL FOR EDITING - S T A R T -->
+		<!-- -=-=-=-=-=-=-=-=-=-=- -->
+		<div class="reveal" id="edit_item" data-reveal data-options="showDelay:200; hideDelay:200">
+			<h4 class="padding-height-20">Edit administrator #<span class="admin_id"></span></h4>
+			<form class="edit_admin">
+				{% csrf_token %}
+				<div class="row">
+					<div class="medium-6 small-12 columns">
+						<label>
+							Username
+							<input type="text" name="edit_role_user_username" required>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							E-mail
+							<input type="text" name="edit_role_user_email" required>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-6 small-12 columns">
+						<label>
+							First Name
+							<input type="text" name="edit_role_user_firstname" required>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							Last Name
+							<input type="text" name="edit_role_user_lastname" required>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="mall-12 columns">
+						<label>
+							Address
+							<textarea name="edit_role_user_address" rows="3"></textarea>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="medium-12 small-12 columns">
+						<label>
+							<input type="checkbox" name="edit_password" value="1" unchecked> Change user's password
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							Password
+							<input type="password" name="edit_role_user_password1" disabled>
+						</label>
+					</div>
+					<div class="medium-6 small-12 columns">
+						<label>
+							Repeat password
+							<input type="password" name="edit_role_user_password2" disabled>
+						</label>
+					</div>
+				</div>
+
+
+				<input type="hidden" name="page_number" value="1">
+				<input type="hidden" name="edit_role_user_id" value="">
+
+				<p>All fields marked with * are required</p>
+
+				<button data-close aria-label="Close modal" type="button" class="button small secondary">
+					Cancel
+				</button>
+
+				<button type="button" class="button small success text-white edit_item_save float-right">
+					Save Admin
+				</button>
+
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<!-- -=-=-=-=-=-=-=-=-=-=- -->
+		<!-- REVEAL FOR EDITING - E N D -->
+		<!-- -=-=-=-=-=-=-=-=-=-=- -->
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('[name="search-input"]').val('');
+			$('[name="mobile-search-input"]').val('');
+			$('.add_edit_admin').trigger("reset");
+			page_listing(1);
+		});
+
+		$(document).on('click', '.go_to_next_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_previous_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_specific_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('keyup', '[name="search-input"]', function () {
+			var search_key = $('[name="search-input"]').val();
+			search(1, search_key);
+		});
+
+		$(document).on('keyup', '[name="mobile-search-input"]', function () {
+			var search_key = $('[name="mobile-search-input"]').val();
+			$('[name="search-input"]').val(search_key);
+			search(1, search_key);
+		});
+
+		function search(page_number, search_key) {
+			var request_url = '/manager/admins/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					search_key: search_key,
+					action: 'search',
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function page_listing(page_number, search_key) {
+			var request_url = '/manager/admins/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var table_body = $('.items-table-body');
+			var drugs_article_table = $('.items-table');
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function parse_list(result) {
+			var table_body = $('.items-table-body');
+			var drugs_article_table = $('.items-table');
+			table_body.html('');
+			$.each(result.items_list, function (item, admin) {
+				var append_row = '';
+				append_row += '<tr>' +
+					'<td>' +
+					'<label class="id-checkbox">' +
+					'<input type="checkbox" name="id" class="checkbox" value="' + admin.id + '">' +
+					'<span>' + admin.id + '</span><br>' +
+					'</label>' +
+					'</td>' +
+					'<td>' +
+					'<span  data-open="edit_item" class="edit_item_link"><strong>' + admin.username + '</strong></span><br>' +
+					'<span class="subheader small">(Address: <span class="admin_address">' + admin.address + '</span>)</span>' +
+					'</td>' +
+					'<td><span class="admin_firstname">' + admin.firstname + '</span></td>' +
+					'<td><span class="admin_lastname">' + admin.lastname + '</span></td>' +
+					'<td><span class="admin_email">' + admin.email + '</span></td>' +
+					'<td>' + admin.uuid + '</td>' +
+					'</tr>';
+
+				table_body.append(append_row);
+			});
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK START           //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check previous page - starts
+			var previous_page = '';
+			if (result.pages_has_previous == false) {
+				previous_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button previous disabled">' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_previous == true) {
+				previous_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button previous go_to_previous_page' + '">' +
+					'<span class="hidden">' + result.previous_page_number + '</span>' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			// Check previous page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check next page - starts
+			var next_page = '';
+			if (result.pages_has_next == true) {
+				next_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button next go_to_next_page">' +
+					'<span class="hidden">' + result.next_page_number + '</span>' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_next == false) {
+				next_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button next disabled">' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			// Check next page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check page range - starts
+			var page_range = '';
+			$.each(result.page_range, function (item, page_number) {
+				var page_in_range = '';
+
+				if (page_number.page_number == result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item disabled">' +
+						'<a class="paginate_button current">' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				if (page_number.page_number != result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item">' +
+						'<a class="paginate_button go_to_specific_page">' +
+						'<span class="hidden">' + page_number.page_number + '</span>' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				page_range += page_in_range;
+			});
+
+			// Check page range - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			var pagination = '<nav>' +
+				'<ul class="pagination justify-content-center">' +
+				previous_page + page_range + next_page +
+				'</ul>' +
+				'</nav>';
+			$('.bottom-navigation').html(pagination);
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK END             //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK START            //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			var page_pagination_info = '' +
+				'Showing page ' + result.current_page + ' of ' + result.all_pages_count;
+			$('.bottom-page-info').html(page_pagination_info);
+			$('[name="page_number"]').val(result.current_page);
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK END              //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			drugs_article_table.show(pagination);
+			$(document).foundation();
+
+		}
+
+		$(document).on('click', '.add_edit_item_save', function () {
+
+			var request_url = '/manager/admins/add-edit/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var page_number = $('[name="page_number"]').val();
+			var role_user_username = $('[name="role_user_username"]').val();
+			var role_user_password1 = $('[name="role_user_password1"]').val();
+			var role_user_password2 = $('[name="role_user_password2"]').val();
+			var role_user_email = $('[name="role_user_email"]').val();
+			var role_user_firstname = $('[name="role_user_firstname"]').val();
+			var role_user_lastname = $('[name="role_user_lastname"]').val();
+			var role_user_address = $('[name="role_user_address"]').val();
+
+			if (role_user_password1 == role_user_password2) {
+				$.ajax({
+					type: "POST",
+					url: request_url,
+					data: {
+						csrfmiddlewaretoken: csrf_token,
+						role_user_username: role_user_username,
+						role_user_password: role_user_password1,
+						role_user_email: role_user_email,
+						role_user_firstname: role_user_firstname,
+						role_user_lastname: role_user_lastname,
+						role_user_address: role_user_address,
+						page_number: page_number
+					},
+					success: function (result) {
+						$('#add_new_item').foundation('close');
+						$('.add_edit_admin').trigger("reset");
+						page_listing(result);
+					}
+				});
+			}
+			if (role_user_password1 != role_user_password2) {
+				alert("Passwords not match");
+			}
+
+		});
+
+
+		$(document).on('click', '.edit_item_save', function () {
+
+			var request_url = '/manager/admins/add-edit/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var page_number = $('[name="page_number"]').val();
+			var role_user_id = $('[name="edit_role_user_id"]').val();
+			var role_user_username = $('[name="edit_role_user_username"]').val();
+			var role_user_password1 = $('[name="edit_role_user_password1"]').val();
+			var role_user_password2 = $('[name="edit_role_user_password2"]').val();
+			var role_user_email = $('[name="edit_role_user_email"]').val();
+			var role_user_firstname = $('[name="edit_role_user_firstname"]').val();
+			var role_user_lastname = $('[name="edit_role_user_lastname"]').val();
+			var role_user_address = $('[name="edit_role_user_address"]').val();
+
+			var edit_password = '0';
+			if ($('[name="edit_password"]').prop("checked") == true) {
+				var edit_password = '1';
+			}
+
+			if (role_user_password1 == role_user_password2) {
+				$.ajax({
+					type: "POST",
+					url: request_url,
+					data: {
+						csrfmiddlewaretoken: csrf_token,
+						id: role_user_id,
+						role_user_username: role_user_username,
+						role_user_password: role_user_password1,
+						role_user_email: role_user_email,
+						role_user_firstname: role_user_firstname,
+						role_user_lastname: role_user_lastname,
+						role_user_address: role_user_address,
+						action: 'edit_item',
+						edit_password: edit_password,
+						page_number: page_number
+					},
+					success: function (result) {
+						$('#edit_item').foundation('close');
+						$('.edit_admin').trigger("reset");
+						page_listing(result);
+					}
+				});
+			}
+			if (role_user_password1 != role_user_password2) {
+				alert("Passwords not match");
+			}
+
+		});
+
+		$(document).on('click', '.edit_item_link', function () {
+
+			var request_url = '/manager/admins/add-edit/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var page_number = $('[name="page_number"]').val();
+
+			var admin_id = $(this).parent().parent().find('[name="id"]').val();
+			var admin_username = $(this).text();
+			var admin_address = $(this).parent().find('.admin_address').text();
+			var admin_firstname = $(this).parent().parent().find('.admin_firstname').text();
+			var admin_lastname = $(this).parent().parent().find('.admin_lastname').text();
+			var admin_email = $(this).parent().parent().find('.admin_email').text();
+
+			var role_user_id = $('[name="edit_role_user_id"]').val(admin_id);
+			var role_user_username = $('[name="edit_role_user_username"]').val(admin_username);
+			var role_user_password1 = $('[name="edit_role_user_password1"]').val('');
+			var role_user_password2 = $('[name="edit_role_user_password2"]').val('');
+			var role_user_email = $('[name="edit_role_user_email"]').val(admin_email);
+			var role_user_firstname = $('[name="edit_role_user_firstname"]').val(admin_firstname);
+			var role_user_lastname = $('[name="edit_role_user_lastname"]').val(admin_lastname);
+			var role_user_address = $('[name="edit_role_user_address"]').val(admin_address);
+			$('#edit_item').find('.admin_id').text(admin_id);
+
+			$('[name="edit_role_user_password1"]').prop("disabled", true);
+			$('[name="edit_role_user_password2"]').prop("disabled", true);
+			$('[name="edit_password"]').prop("checked", false);
+
+		});
+
+		$('[name="edit_password"]').change(function () {
+			if (this.checked) {
+				$('[name="edit_role_user_password1"]').val('');
+				$('[name="edit_role_user_password2"]').val('');
+
+				$('[name="edit_role_user_password1"]').prop("disabled", false);
+				$('[name="edit_role_user_password2"]').prop("disabled", false);
+			}
+			else {
+				$('[name="edit_role_user_password1"]').val('');
+				$('[name="edit_role_user_password2"]').val('');
+
+				$('[name="edit_role_user_password1"]').prop("disabled", true);
+				$('[name="edit_role_user_password2"]').prop("disabled", true);
+			}
+		});
+
+	</script>
+{% endblock %}

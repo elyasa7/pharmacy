@@ -1,0 +1,329 @@
+{% extends "admin/main_admin.html" %}
+
+{% block main_wrapper %}
+	{% include 'admin/blocks/admin_main_menu.html' %}
+	{% csrf_token %}
+	<div class="padding-all-20">
+		<h3 class="float-left">
+			Pharmacy catalogue
+		</h3>
+		<div class="button-group small float-right">
+			<a class="button success text-white small-border-radius" data-open="add_new_drug_article">
+				Add<span class="show-for-large"> article</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Extended filter</span>
+				<span class="hide-for-large">Filter</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				Enable
+			</a>
+			<a class="button secondary small-border-radius">
+				Disable
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Delete</span>
+				<span class="hide-for-large">D</span>
+			</a>
+		</div>
+
+		<table class="hover drugs-article-table">
+			<thead>
+			<tr>
+				<td class="width-0">ID</td>
+				<td>Name</td>
+				<td>Description</td>
+				<td>Aliases count</td>
+				<td>UUID</td>
+			</tr>
+			</thead>
+			<tbody class="drugs-article-table-body"></tbody>
+		</table>
+
+		<div class="bottom-page-info float-left"></div>
+		<div class="bottom-navigation float-right"></div>
+
+		<div class="reveal" id="add_new_drug_article" data-reveal data-options="showDelay:200; hideDelay:200">
+			<h4 class="padding-height-20">Add new drug article</h4>
+			<form class="add_edit_drug_article">
+				{% csrf_token %}
+			<label>
+				Drug title*
+				<input type="text" name="main_drug_title" required>
+			</label>
+			<label>
+				Drug Article*
+				<input type="text" name="main_drug_article" required>
+			</label>
+			<label>
+				Drug Description
+				<textarea name="main_drug_description" rows="3"></textarea>
+			</label>
+			<input type="hidden" name="page_number" value="1">
+			<p>All fields marked with * are required</p>
+
+			<button  data-close aria-label="Close modal" type="button" class="button small secondary">
+				Cancel
+			</button>
+
+			<button type="button" class="button small success text-white add_edit_drug_article_save float-right">
+				Save Article
+			</button>
+
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	</div>
+
+<script type="text/javascript">
+		$(document).ready(function () {
+			$('[name="search-input"]').val('');
+			$('[name="mobile-search-input"]').val('');
+			page_listing(1);
+		});
+
+		$(document).on('click', '.go_to_next_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_previous_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_specific_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('keyup', '[name="search-input"]', function () {
+			var search_key = $('[name="search-input"]').val();
+			search(1, search_key);
+		});
+
+		$(document).on('keyup', '[name="mobile-search-input"]', function () {
+			var search_key = $('[name="mobile-search-input"]').val();
+			$('[name="search-input"]').val(search_key);
+			search(1, search_key);
+		});
+
+		function search(page_number, search_key) {
+			var request_url = '/manager/articles/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					search_key: search_key,
+					action: 'search',
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function page_listing(page_number, search_key) {
+			var request_url = '/manager/articles/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var table_body = $('.drugs-article-table-body');
+			var drugs_article_table = $('.drugs-article-table');
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function parse_list(result) {
+			var table_body = $('.drugs-article-table-body');
+			var drugs_article_table = $('.drugs-article-table');
+			table_body.html('');
+			$.each(result.drug_list, function (item, drug) {
+				var append_row = '';
+				append_row += '<tr>' +
+					'<td>' +
+					'<label class="id-checkbox">' +
+					'<input type="checkbox" name="article_id" class="checkbox" value="' + drug.id + '">' +
+					'<span>' + drug.id + '</span><br>' +
+					'</label>' +
+					'</td>' +
+					'<td>' +
+						'<strong>' + drug.title + '</strong><br>' +
+						'<span class="subheader small">(Article: ' + drug.article + ')</span>' +
+					'</td>' +
+					'<td>' + drug.description + '</td>' +
+					'<td>' + drug.count + '</td>' +
+					'<td>' + drug.uuid + '</td>' +
+					'</tr>';
+
+				table_body.append(append_row);
+			});
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK START           //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check previous page - starts
+			var previous_page = '';
+			if (result.pages_has_previous == false) {
+				previous_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button previous disabled">' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_previous == true) {
+				previous_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button previous go_to_previous_page' + '">' +
+					'<span class="hidden">' + result.previous_page_number + '</span>' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			// Check previous page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check next page - starts
+			var next_page = '';
+			if (result.pages_has_next == true) {
+				next_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button next go_to_next_page">' +
+					'<span class="hidden">' + result.next_page_number + '</span>' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_next == false) {
+				next_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button next disabled">' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			// Check next page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check page range - starts
+			var page_range = '';
+			$.each(result.page_range, function (item, page_number) {
+				var page_in_range = '';
+
+				if (page_number.page_number == result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item disabled">' +
+						'<a class="paginate_button current">' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				if (page_number.page_number != result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item">' +
+						'<a class="paginate_button go_to_specific_page">' +
+						'<span class="hidden">' + page_number.page_number + '</span>' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				page_range += page_in_range;
+			});
+
+			// Check page range - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			var pagination = '<nav>' +
+				'<ul class="pagination justify-content-center">' +
+				previous_page + page_range + next_page +
+				'</ul>' +
+				'</nav>';
+			$('.bottom-navigation').html(pagination);
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK END             //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK START            //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			var page_pagination_info = '' +
+				'Showing page ' + result.current_page + ' of ' + result.all_pages_count;
+			$('.bottom-page-info').html(page_pagination_info);
+			$('[name="page_number"]').val(result.current_page);
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK END              //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			drugs_article_table.show(pagination);
+
+		}
+
+		$(document).on('click', '.add_edit_drug_article_save', function () {
+
+			var request_url = '/manager/articles/add-edit/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var page_number = $('[name="page_number"]').val();
+			var main_drug_description = $('[name="main_drug_description"]').val();
+			var main_drug_article = $('[name="main_drug_article"]').val();
+			var main_drug_title = $('[name="main_drug_title"]').val();
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					main_drug_description: main_drug_description,
+					main_drug_article: main_drug_article,
+					main_drug_title: main_drug_title,
+					page_number: page_number
+				},
+				success: function (result) {
+					$('#add_new_drug_article').foundation('close');
+					$('.add_edit_drug_article').trigger("reset");;
+					page_listing(result);
+				}
+			});
+		});
+
+</script>
+{% endblock %}

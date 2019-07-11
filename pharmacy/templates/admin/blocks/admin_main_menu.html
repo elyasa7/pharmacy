@@ -1,0 +1,88 @@
+{% load staticfiles %}
+
+<div class="off-canvas ecommerce-header-off-canvas position-left" id="ecommerce-header" data-off-canvas>
+
+	<!-- Close button -->
+	<span class="offcanvas-menu-title">IT-pharma menu</span>
+	<button class="close-button" aria-label="Close menu" type="button" data-close>
+		<span aria-hidden="true">&times;</span>
+	</button>
+
+	<ul class="vertical menu">
+		<li class="main-nav-link"><a href="/manager/">Pharmacy Articles</a></li>
+		<li class="main-nav-link"><a href="#">Category 2</a></li>
+		<li class="main-nav-link"><a href="why.html">Category 3</a></li>
+		<li class="main-nav-link"><a href="build.html">Category 4</a></li>
+		<li class="main-nav-link"><a href="#">Category 5</a></li>
+	</ul>
+
+	<hr>
+
+	<!-- Menu -->
+	<ul class="menu vertical">
+		<li><a href="#" class="test-hidden-wrapper">Test</a></li>
+		<li><a href="#">Help</a></li>
+		<li><a href="#">Order Status</a></li>
+		<li><a href="#">Contact</a></li>
+		<li><a href="#">My Account</a></li>
+	</ul>
+
+</div>
+
+<!-- NOTE: This is the header menu that appears at the top of your site. -->
+<div class="off-canvas-content" data-off-canvas-content>
+	<div class="ecommerce-header-top show-for-large">
+		<div class="row align-justify max-row">
+			<div class="ecommerce-header-top-message">
+				Pharmacy admin dashboard
+			</div>
+			<div class="ecommerce-header-top-links">
+				<ul>
+					<li><a href="#" class="test-hidden-wrapper">Test</a></li>
+					<li><a href="#">Help</a></li>
+					<li><a href="#">Order Status</a></li>
+					<li><a href="#">Contact</a></li>
+					<li><a href="#">My Account</a></li>
+					<li><a href="#" target="_blank"><i class="fa fa-shopping-cart"></i></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="ecommerce-header show-for-large">
+		<div class="row align-justify align-middle max-row">
+			<div class="shrink column">
+				<ul class="vertical medium-horizontal menu">
+					<li><a href="/manager/"><img class="logo" src="{% static "images/system/logo_pharmacy.png" %}"></a></li>
+					<li class="main-nav-link"><a href="/manager/articles/">Pharmacy Articles</a></li>
+					<li class="main-nav-link"><a href="/manager/pharmacies/">Supplier pharmacies</a></li>
+					<li class="main-nav-link"><a href="/manager/suppliers/">Suppliers manager</a></li>
+					<li class="main-nav-link"><a href="/manager/admins/">Admins</a></li>
+				</ul>
+			</div>
+			<div class="shrink column">
+				<ul class="menu">
+					<li><input type="search" placeholder="Search" name="search-input"></li>
+					<li>
+						<button type="button" class="button search-button"></button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="ecommerce-header-mobile hide-for-large">
+		<div class="ecommerce-header-mobile-left">
+			<button class="menu-icon" type="button" data-toggle="ecommerce-header"></button>
+			<form class="ecommerce-header-search-exandable">
+				<input type="search" placeholder="Search" name="mobile-search-input">
+			</form>
+		</div>
+		<div class="ecommerce-header-mobile-center">
+			<a href="/manager/"><img class="logo" src="{% static "images/system/logo_pharmacy_small_white.png" %}"></a>
+		</div>
+		<div class="ecommerce-header-mobile-right">
+			<i class="fa fa-shopping-cart"></i>
+		</div>
+	</div>
+</div>

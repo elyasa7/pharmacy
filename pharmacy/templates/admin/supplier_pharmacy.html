@@ -1,0 +1,446 @@
+{% extends "admin/main_admin.html" %}
+
+{% block main_wrapper %}
+	{% include 'admin/blocks/admin_main_menu.html' %}
+	{% include "admin/supplier_pharmacy_page.html" %}
+	{% csrf_token %}
+	<div class="tmp-wrapper hidden"></div>
+	<div class="padding-all-20 main-wrapper">
+		<h3 class="float-left">
+			Suppliers pharmacies
+		</h3>
+		<p>
+
+		</p>
+		<div class="button-group small float-right">
+			<a class="button success text-white small-border-radius" data-open="add_new_reseller_drug">
+				Add<span class="show-for-large"> pharmacy</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Extended filter</span>
+				<span class="hide-for-large">Filter</span>
+			</a>
+			<a class="button secondary small-border-radius">
+				Enable
+			</a>
+			<a class="button secondary small-border-radius">
+				Disable
+			</a>
+			<a class="button secondary small-border-radius">
+				<span class="show-for-large">Delete</span>
+				<span class="hide-for-large">D</span>
+			</a>
+		</div>
+
+		<table class="hover drugs-article-table">
+			<thead>
+			<tr>
+				<td class="width-0">ID</td>
+				<td>Name</td>
+				<td>Code/Alias</td>
+				<td>Dealer</td>
+				<td>Price</td>
+				<td>Description</td>
+				<td>In stock</td>
+				<td>Images</td>
+				<td>UUID</td>
+			</tr>
+			</thead>
+			<tbody class="drugs-article-table-body"></tbody>
+		</table>
+
+		<div class="bottom-page-info float-left"></div>
+		<div class="bottom-navigation float-right"></div>
+
+		<div class="reveal" id="add_new_reseller_drug" data-reveal data-options="showDelay:200; hideDelay:200">
+			<h4 class="padding-height-20">Add new Reseller drug</h4>
+
+			<form class="add_edit_reseller_drug">
+				{% csrf_token %}
+				<label>
+					Drug title *
+					<input type="text" name="reseller_drug_title" required>
+				</label>
+				<label>
+					Drug Price *
+					<input type="number" name="reseller_drug_price" step="0.01" min="1" value="1" required>
+				</label>
+				<label>
+					<input type="checkbox" name="reseller_drug_available" value="1"> Available in stock
+				</label>
+				<label>
+					Drug Code/Alias *
+					<input type="text" name="reseller_drug_alias_article" required>
+				</label>
+				<label>
+					Drug Article *
+					<input type="hidden" name="reseller_drug_main" required>
+					<input type="text" data-toggle="reseller_drug_main_dropdown" class="reseller_drug_main_dropdown_search">
+					<div class="dropdown-pane scrollable-dropdown reseller_drug_main_dropdown_select" id="reseller_drug_main_dropdown" data-dropdown>
+						{% for article in articles %}
+							<a class="primary reseller_drug_main_article_select_item">
+								<span class="hidden id">{{ article.id }}</span>
+								<span class="hidden title">{{ article.main_drug_title }}</span>
+								{{ article.main_drug_title }}
+							</a>
+							<br>
+						{% endfor %}
+					</div>
+				</label>
+				<label>
+					Drug Description
+					<textarea name="reseller_drug_description" rows="3"></textarea>
+				</label>
+
+				<select name="reseller_drug_dealer" required>
+					<option selected disabled>
+						Select Supplier
+					</option>
+					{% for supplier in suppliers %}
+						<option value="{{ supplier.id }}">{{ supplier.role_supplier_title }}</option>
+					{% endfor %}
+				</select>
+
+				<label for="reseller_drug_image" class="button tiny">Browse...</label>
+				Select images <input type="file" id="reseller_drug_image" name="reseller_drug_image" class="show-for-sr" multiple>
+
+				<input type="hidden" name="page_number" value="1">
+
+				<p>All fields marked with * are required</p>
+
+				<button data-close aria-label="Close modal" type="button" class="button small secondary">
+					Cancel
+				</button>
+
+				<button type="button"
+				        class="button small success text-white add_edit_reseller_drug_save float-right">
+					Save Article
+				</button>
+
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	</div>
+
+<script type="text/javascript">
+		$(document).ready(function () {
+			$('[name="search-input"]').val('');
+			$('[name="mobile-search-input"]').val('');
+			page_listing(1);
+			//parse_list({{ drugs|safe }});
+		});
+
+		$(document).on('click', '.go_to_next_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_previous_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('click', '.go_to_specific_page', function () {
+			var page_number = $(this).find('span').text();
+			var search_key = $('[name="search-input"]').val();
+			if (!$(search_key)) {
+				page_listing(page_number);
+			}
+			else {
+				search(page_number, search_key);
+			}
+		});
+
+		$(document).on('keyup', '[name="search-input"]', function () {
+			var search_key = $('[name="search-input"]').val();
+			search(1, search_key);
+		});
+
+		$(document).on('keyup', '[name="mobile-search-input"]', function () {
+			var search_key = $('[name="mobile-search-input"]').val();
+			$('[name="search-input"]').val(search_key);
+			search(1, search_key);
+		});
+
+		function search(page_number, search_key) {
+			var request_url = '/manager/pharmacies/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					search_key: search_key,
+					action: 'search',
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function page_listing(page_number, search_key) {
+			var request_url = '/manager/pharmacies/list/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var table_body = $('.drugs-article-table-body');
+			var drugs_article_table = $('.drugs-article-table');
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					page_number: page_number
+				},
+				success: function (result) {
+					parse_list(result);
+				}
+			});
+		}
+
+		function parse_list(result) {
+			var table_body = $('.drugs-article-table-body');
+			var drugs_article_table = $('.drugs-article-table');
+			table_body.html('');
+			$.each(result.drug_list, function (item, drug) {
+				var append_row = '';
+				var in_stock = 'in stock';
+				if (drug.available == false) {
+					in_stock = 'out of stock';
+				}
+				append_row += '<tr>' +
+					'<td>' +
+					'<label class="id-checkbox">' +
+					'<input type="checkbox" name="article_id" class="checkbox" value="' + drug.id + '">' +
+					'<span>' + drug.id + '</span><br>' +
+					'</label>' +
+					'</td>' +
+					'<td class="cursor-pointer" onclick="get_pharmacy_info(' + "'" + drug.uuid + "'" + ')">' +
+						'<strong>' + drug.title + '</strong><br>' +
+						'<span class="subheader small">' + drug.article + '</span>' +
+					'</td>' +
+					'<td>' + drug.alias + '</td>' +
+					'<td>' + drug.dealer + '</td>' +
+					'<td>' + drug.price + '$</td>' +
+					'<td style="max-width: 450px;">' + drug.description + '</td>' +
+					'<td>' + in_stock + '</td>' +
+					'<td>' + drug.images_set + '</td>' +
+					'<td>' + drug.uuid + '</td>' +
+					'</tr>';
+
+				table_body.append(append_row);
+			});
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK START           //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check previous page - starts
+			var previous_page = '';
+			if (result.pages_has_previous == false) {
+				previous_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button previous disabled">' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_previous == true) {
+				previous_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button previous go_to_previous_page' + '">' +
+					'<span class="hidden">' + result.previous_page_number + '</span>' +
+					'←' +
+					'</a>' +
+					'</li>';
+			}
+			// Check previous page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check next page - starts
+			var next_page = '';
+			if (result.pages_has_next == true) {
+				next_page = '' +
+					'<li class="page-item">' +
+					'<a class="paginate_button next go_to_next_page">' +
+					'<span class="hidden">' + result.next_page_number + '</span>' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			if (result.pages_has_next == false) {
+				next_page = '' +
+					'<li class="page-item disabled">' +
+					'<a class="paginate_button next disabled">' +
+					'→' +
+					'</a>' +
+					'</li>';
+			}
+			// Check next page - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// Check page range - starts
+			var page_range = '';
+			$.each(result.page_range, function (item, page_number) {
+				var page_in_range = '';
+
+				if (page_number.page_number == result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item disabled">' +
+						'<a class="paginate_button current">' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				if (page_number.page_number != result.current_page) {
+					page_in_range = '' +
+						'<li class="page-item">' +
+						'<a class="paginate_button go_to_specific_page">' +
+						'<span class="hidden">' + page_number.page_number + '</span>' +
+						page_number.page_number +
+						'</a>' +
+						'</li>';
+				}
+
+				page_range += page_in_range;
+			});
+
+			// Check page range - ends
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			var pagination = '<nav>' +
+				'<ul class="pagination justify-content-center">' +
+				previous_page + page_range + next_page +
+				'</ul>' +
+				'</nav>';
+			$('.bottom-navigation').html(pagination);
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGINATION BLOCK END             //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK START            //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			var page_pagination_info = '' +
+				'Showing page ' + result.current_page + ' of ' + result.all_pages_count;
+			$('.bottom-page-info').html(page_pagination_info);
+			$('[name="page_number"]').val(result.current_page);
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+			// PAGE INFO BLOCK END              //
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
+
+			drugs_article_table.show(pagination);
+
+		}
+
+		$(document).on('click', '.add_edit_reseller_drug_save', function () {
+
+			var request_url = '/manager/pharmacies/add-edit/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var page_number = $('[name="page_number"]').val();
+
+			var reseller_drug_title = $('[name="reseller_drug_title"]').val();
+			var reseller_drug_alias_article = $('[name="reseller_drug_alias_article"]').val();
+			var reseller_drug_main = $('[name="reseller_drug_main"]').val();
+			var reseller_drug_description = $('[name="reseller_drug_description"]').val();
+			var reseller_drug_dealer = $('[name="reseller_drug_dealer"]').val();
+			var reseller_drug_price = $('[name="reseller_drug_price"]').val();
+			var reseller_drug_available = $('[name="reseller_drug_available"]').val();
+			var reseller_drug_image = $('[name="reseller_drug_image"]').prop('files')[0];
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: function () {
+					var data = new FormData();
+					jQuery.each(jQuery('[name="reseller_drug_image"]')[0].files, function (i, file) {
+						data.append('reseller_drug_image', file);
+					});
+					data.append('csrfmiddlewaretoken', csrf_token);
+					data.append('reseller_drug_title', reseller_drug_title);
+					data.append('reseller_drug_alias_article', reseller_drug_alias_article);
+					data.append('reseller_drug_main', reseller_drug_main);
+					data.append('reseller_drug_description', reseller_drug_description);
+					data.append('reseller_drug_dealer', reseller_drug_dealer);
+					data.append('reseller_drug_price', reseller_drug_price);
+					data.append('reseller_drug_available', reseller_drug_available);
+					data.append('page_number', page_number);
+					return data;
+				}(),
+				cache: false,
+				contentType: false,
+				processData: false,
+				success: function (result) {
+					$('#add_new_reseller_drug').foundation('close');
+					$('.add_edit_reseller_drug').trigger("reset");
+					page_listing(result);
+				}
+			});
+		});
+
+
+		$(document).on('keyup', '.reseller_drug_main_dropdown_search', function () {
+
+			var request_url = '/manager/pharmacies/search-articles/';
+			var csrf_token = $('[name="csrfmiddlewaretoken"]').val();
+			var search_key = $('.reseller_drug_main_dropdown_search').val();
+
+			$.ajax({
+				type: "POST",
+				url: request_url,
+				data: {
+					csrfmiddlewaretoken: csrf_token,
+					search_key: search_key
+				},
+				success: function (result) {
+					$('.reseller_drug_main_dropdown_select').html('');
+					var new_content = '';
+
+					$.each(result.drugs_list, function (item, drug) {
+
+						new_content += '' +
+							'<a class="primary reseller_drug_main_article_select_item">' +
+								'<span class="hidden id">' + drug.id + '</span>' +
+								'<span class="hidden title">' + drug.title + '</span>' +
+								drug.title +
+							'</a>' +
+							'<br>'
+						;
+					});
+					$('.reseller_drug_main_dropdown_select').html(new_content);
+				}
+			});
+		});
+
+
+		$(document).on('click', '.reseller_drug_main_article_select_item', function () {
+
+			var id = $(this).find('.id').text();
+			var title = $(this).find('.title').text();
+			$('.reseller_drug_main_dropdown_search').val(title);
+			$('[name="reseller_drug_main"]').val(id);
+		});
+
+</script>
+{% endblock %}
